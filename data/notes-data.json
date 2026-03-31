@@ -1,0 +1,90 @@
+[
+  {
+    "id": "note-1",
+    "title": "徕卡 M11 使用体验深度评测",
+    "category": "设备研究",
+    "year": 2025,
+    "coverImage": "https://images.unsplash.com/photo-1612186424774-3d0d2d265f0a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
+    "detailImages": []
+  },
+  {
+    "id": "note-2",
+    "title": "养猫第一年：从零开始的铲屎官",
+    "category": "猫",
+    "year": 2025,
+    "coverImage": "https://images.unsplash.com/photo-1773558445430-063b68bfe88a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
+    "detailImages": []
+  },
+  {
+    "id": "note-3",
+    "title": "广州老城区街头摄影记录",
+    "category": "摄影",
+    "year": 2025,
+    "coverImage": "https://images.unsplash.com/photo-1696695101117-f9a2d250412b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
+    "detailImages": []
+  },
+  {
+    "id": "note-4",
+    "title": "Sony α7C II 与 FE 35mm 镜头组合测评",
+    "category": "设备研究",
+    "year": 2025,
+    "coverImage": "https://images.unsplash.com/photo-1768081529866-a5ec754fe14c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
+    "detailImages": []
+  },
+  {
+    "id": "note-5",
+    "title": "橘猫的一天：阳台、沙发与阳光",
+    "category": "猫",
+    "year": 2024,
+    "coverImage": "https://images.unsplash.com/photo-1760317129776-58f6845566b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
+    "detailImages": []
+  },
+  {
+    "id": "note-6",
+    "title": "夜间长曝光摄影技巧与实战",
+    "category": "摄影",
+    "year": 2024,
+    "coverImage": "https://images.unsplash.com/photo-1752676437286-d68d9a99a4de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
+    "detailImages": []
+  },
+  {
+    "id": "note-7",
+    "title": "2024 iPhone 16 Pro 摄影模块详解",
+    "category": "设备研究",
+    "year": 2024,
+    "coverImage": "https://images.unsplash.com/photo-1758577675644-076b0ddca611?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
+    "detailImages": []
+  },
+  {
+    "id": "note-8",
+    "title": "猫咪喜欢睡觉的地方：一份观察记录",
+    "category": "猫",
+    "year": 2024,
+    "coverImage": "https://images.unsplash.com/photo-1767371654992-e3ad63bafbac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
+    "detailImages": []
+  },
+  {
+    "id": "note-9",
+    "title": "几何构图在建筑摄影中的应用",
+    "category": "摄影",
+    "year": 2024,
+    "coverImage": "https://images.unsplash.com/photo-1689538460822-c954ac9c7b9f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
+    "detailImages": []
+  },
+  {
+    "id": "note-10",
+    "title": "Sony WH-1000XM5 降噪耳机长期使用报告",
+    "category": "设备研究",
+    "year": 2023,
+    "coverImage": "https://images.unsplash.com/photo-1715785891719-7eaaa70a2996?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
+    "detailImages": []
+  },
+  {
+    "id": "note-11",
+    "title": "流浪猫拍摄：与街头生命的相遇",
+    "category": "猫",
+    "year": 2023,
+    "coverImage": "https://images.unsplash.com/photo-1773558445430-063b68bfe88a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
+    "detailImages": []
+  }
+]
