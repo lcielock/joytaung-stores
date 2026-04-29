@@ -1,6 +1,76 @@
-# 表情系统说明
+# 小智魔改流程
 
-## 优先级等级总览
+## 描述
+本文档适用于使用AI辅助编程魔改虾哥开源项目的网友。此文档修改仅集中处理表情逻辑机制，既不关心硬件性能，也不关心硬件扩展。虾哥的开源项目（https://github.com/78/xiaozhi-esp32）在大量的硬件上做了相应适配，如果能在硬件支持列表当中找到对应的硬件继续开发会大大减少开发难度。
+
+## 魔改前准备
+### 开发环境配置
+1、需要一台能运行windows系统的电脑，并且性能尚可（如cpu为intel 12代i5或以上，否则编译会非常缓慢）。不支持苹果电脑。
+
+2、准备一个有效的AI开发工具，如trae，codex等。价格越贵效果越好。
+
+3、在电脑上安装和配置python环境，参考（https://icnynnzcwou8.feishu.cn/wiki/JEYDwTTALi5s2zkGlFGcDiRknXf），只需下载和安装idf软件即可，还不需要开始编译（即文章中的前三点）
+
+4、开始前需要确保手上的硬件设备能正常运行，如果是购买的成品硬件（如微雪电子等第三方已经组装好的），则需要向商家获取对应的“例程”。注意：很多时候商家对商品的管理并不完善，相关例程需要咨询客服甚至添加微信才会发送到客户手中，对于经常更新的硬件设备来说是正常的事情。
+
+## 魔改思路步骤
+以下使用硬件设备waveshare esp32-s3-touch-lcd-1.85-qmi为例。该设备拥有摇晃传感器、触摸屏、sd卡扩展等原版小智不支持的功能。
+### 整理硬件驱动和开发文档
+#### 单独硬件资料整理
+1、使用AI开发工具，打开例程（问客服获取）的文件夹目录，要求AI：
+
+```
+我目前正使用esp32进行开发，请将此部分（比如屏幕）硬件的GPIO接口、驱动、使用方法整理成资料文件，并放入到根目录document文件夹当中，以便我快速迁移到其他硬件
+```
+> 有多少个硬件就说多少次，这样能节省token和增加完整性。如硬件当中的摄像头、屏幕、摇晃传感器、sd卡扩展都可以视为单独个体。
+
+2、提取刚刚整理好的document文件夹，放到需要实际开发的文件夹里面（如xiaozhi-esp32-main）
+#### 接入硬件
+1、使用AI开发工具，打开开发文件夹（如xiaozhi-esp32-main）
+
+2、要求AI：
+
+```
+把芯片默认设置为esp32s3
+```
+> 这样之后编译不再需要重复输入idf.py set-target esp32s3
+
+3、整理小智的分区表，以为硬件提供sd卡支持，要求AI：
+
+```
+请参考https://github.com/78/xiaozhi-esp32/blob/main/partitions/v2/README.md，以及参考document文件夹下的资料，对sd卡提供支持
+```
+
+4、添加触摸屏以及摇晃传感器支持，要求AI：
+
+```
+参考document文件夹下的资料，对触摸屏以及摇晃传感器提供支持
+```
+
+5、解决I2C总线占用问题（我的硬件设备会有这个问题，要根据自身情况而定），要求AI：
+
+``` 
+修复I2C总线占用问题
+ ```
+
+6、到这一步可以尝试编译了。打开IDF_v5.5.4_Powershell（即esp-idf编译器，看开发环境配置第3点），输入：
+
+```
+cd e:\xiaozhi-esp32-main
+```
+
+>其中xiaozhi-esp32-main是你开发文件夹的路径
+
+7、编译（具体看编译教程）
+```
+idf.py build
+```
+>这一步大概率会出现很多红色和橙色的警告字段，不要慌张，复制这些字段并返回给AI修复。
+
+### 编写表情逻辑
+对于魔改版小智，需要兼顾原有功能，因此定义4个级别的表情逻辑，从待机模式开始切入表情播放，实现摇晃打断（不打断语音过程）、触摸打断（不打断语音过程）、闲时表情轮转、语音表情替换、sd卡存放表情等功能。
+
+#### 优先级等级总览
 
 | 等级 | 名称 | 优先级数值 | 锁定时间 | 说明 |
 |------|------|-----------|----------|------|
@@ -9,50 +79,34 @@
 | P2 | 发呆优先级 (Idle) | 1 | 5秒 | P3无活动30秒后进入发呆状态 |
 | P3 | 默认优先级 (Default) | 0 (最低) | 31秒 | 待机默认表情，loop=true |
 
-**优先级规则**：数值越高越优先。高优先级可以打断低优先级，低优先级无法替换高优先级。
-
----
-
-## 各等级详细说明
-
-### P0 - 打断优先级
-
+#### P0表情
 **触发条件**：
 - 摇晃设备（六轴传感器 QMI8658 检测到加速度变化）
 - 触摸屏幕
-
-**SD卡目录**：`/sdcard/assets/emotions/p0`
-
-**内置表情**：`shaking`, `ss`, `pain`, `lol`
-
-**时间参数**：
-- `QMI8658_SHAKE_ACCEL_DELTA_THRESHOLD = 0.6f`（摇晃灵敏度阈值，越小越灵敏）
-- `QMI8658_SHAKE_COOLDOWN_MS = 1500`（摇晃触发冷却时间）
-- `kP0DisplayHoldUs = 3秒`（P0锁定时间，3秒内不能再次触发P0）
 
 **行为**：
 - 播放非循环GIF（`loop=false`），播放完后自动恢复之前的AI表情或进入P3
 - 如果AI会话正在进行，打断P1队列，清空排队中的表情
 - 锁定期间新的P0触发会被拒绝
 
-**触发来源代码位置**：
-- 摇晃：`TriggerPhysical()` — 六轴传感器中断
-- 触摸：`TriggerTouch()` — 触摸屏点击
+**存储目录**：
 
----
+```
+/sdcard/assets/emotions/p0
+```
 
-### P1 - AI语音优先级
+**内置表情**：
+摇晃：shaking1,shaking2
+触摸：touching1,touching2
+>请自行添加表情
 
+**奖池设计**：
+触发后在对应的表情当中抽取一个进行播放
+
+#### P1表情
 **触发条件**：
 - AI会话期间，服务器下发表情指令
 - 表情持续循环播放直到AI会话结束
-
-**SD卡目录**：`/sdcard/assets/emotions/p1`
-
-**内置表情**：`neutral`, `happy`, `laughing`, `funny`, `sad`, `angry`, `crying`, `loving`, `embarrassed`, `surprised`, `shocked`, `thinking`, `winking`, `cool`, `relaxed`, `delicious`, `kissy`, `confident`, `sleepy`, `silly`, `confused`
-
-**时间参数**：
-- `kP1DisplayHoldUs = 24小时`（实际表示直到AI会话结束）
 
 **行为**：
 - 表情 `loop=true`，无限循环播放
@@ -64,71 +118,58 @@
 - 如果有，新表情入队；没有则立即播放
 - `OnEmotionFinished()` 负责出队下一个表情
 
----
+**存储目录**：
 
-### P2 - 发呆优先级
+```
+/sdcard/assets/emotions/p1
+```
+
+**内置表情**：
+原21个表情不更改，但是优先检测和使用SD卡里面的同名表情，如果没有同名表情则使用内置emoji
+
+#### P2表情
 
 **触发条件**：
 - P3（默认状态）无活动达到30秒后自动进入
-
-**SD卡目录**：`/sdcard/assets/emotions/p2`
-
-**内置表情**：`looking_around`, `ok`
 
 **时间参数**：
 - `kP2DisplayHoldUs = 5秒`（发呆状态持续5秒）
 - `kP3ToP2IntervalUs = 15秒`（P3无活动15秒后进入P2）
 
 **行为**：
-- 播放非循环GIF，5秒后自动回到P3
+- 播放一次，播放完毕后自动回到P3
 
----
 
-### P3 - 默认优先级
+**存储目录**：
+
+```
+/sdcard/assets/emotions/p2
+```
+
+**内置表情**：
+
+```
+`looking_around`, `ok`
+```
+
+#### P3表情
 
 **触发条件**：
 - 系统启动后默认进入
 - P0/P2/P1结束后自动恢复
 - AI会话结束后自动恢复
 
-**SD卡目录**：`/sdcard/assets/emotions/p3`
+**存储目录**：
 
-**内置表情**：`moren`
-
-**时间参数**：
-- `kP3DisplayHoldUs = 31秒`（锁定时间，防止同优先级重复替换）
-- `kP3ToP2IntervalUs = 15秒`（无活动15秒后进入P2）
+```
+/sdcard/assets/emotions/p1
+```
 
 **行为**：
 - 表情 `loop=true`，无限循环播放
-- 30秒无活动后自动进入P2发呆状态
+- 15秒无活动后自动进入P2发呆状态
 
----
-
-## 表情文件要求
-
-### 文件格式
-- **GIF**：动态表情，支持循环/非循环
-- **PNG**：静态表情（内置emoji使用）
-
-### 文件命名
-- 文件名（不含扩展名）即为表情名称
-- 例如：`happy.gif`、`laughing.gif`、`sad.png`
-
-### 存储位置优先级
-1. SD卡：`/sdcard/assets/emotions/p{0-3}/`
-2. 内置资源：代码中硬编码的表情列表
-
-**注意**：SD卡表情和内置表情名称相同时，SD卡版本优先。
-
----
-
-## 表情显示流程
-
-### 静态图片（非GIF）的完成触发
-内置emoji（如 `sad`、`neutral` 等PNG图片）本身不会产生"播放完成"事件。为了支持P1队列机制，系统使用 `esp_timer` 为非循环的静态图片启动一个1.5秒的定时器，定时器到期后触发 `OnEmotionFinished()`，使队列中的下一个表情得以出队播放。
-
-### P0打断P1的完整流程
+#### P0打断P1的完整流程
 ```
 1. AI正在播放P1表情（loop=true）
 2. 用户摇晃/触摸 → TriggerPhysical/TriggerTouch
@@ -140,25 +181,15 @@
    - 如果AI已结束 → 进入P3
 ```
 
----
+----------------------------
+### 修改细节
+```
+背景和语音过程当中显示的文字改成纯黑色
+```
+----------------------------
+## 接下来可以专心修复BUG了
 
-## 时间参数汇总
 
-| 参数名 | 当前值 | 说明 |
-|--------|--------|------|
-| `kP0DisplayHoldUs` | 3秒 | P0锁定时间，防止频繁触发 |
-| `kP1DisplayHoldUs` | 24小时 | P1锁定时间（实际表示AI会话时长） |
-| `kP2DisplayHoldUs` | 5秒 | P2发呆状态持续时间 |
-| `kP3DisplayHoldUs` | 31秒 | P3锁定时间 |
-| `kP3ToP2IntervalUs` | 15秒 | P3无活动多久后进入P2 |
-| `QMI8658_SHAKE_ACCEL_DELTA_THRESHOLD` | 0.6f | 摇晃灵敏度（越小越灵敏） |
-| `QMI8658_SHAKE_COOLDOWN_MS` | 1500ms | 摇晃触发冷却时间 |
 
----
 
-## 相关代码文件
 
-- `main/boards/waveshare/esp32-s3-touch-lcd-1.85-qmi/esp32-s3-touch-lcd-1.85-qmi.cc` — 表情状态机 `PriorityEmotionArbiter` 类
-- `main/boards/waveshare/esp32-s3-touch-lcd-1.85-qmi/config.h` — 配置参数定义
-- `main/display/lcd_display.cc` — 表情显示逻辑 `LcdDisplay::SetEmotion()`
-- `main/display/lvgl_display/gif/lvgl_gif.cc` — GIF动画控制器
